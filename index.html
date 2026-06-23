@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apex Bank - Digital Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .active-link { background-color: #1e40af; border-left: 4px solid #fbbf24; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans" onload="updateDashboard()">
+
+    <div class="flex h-screen overflow-hidden">
+        
+        <!-- SIDE MENU -->
+        <aside class="w-64 bg-blue-900 text-white flex flex-col">
+            <div class="p-6 text-2xl font-bold border-b border-blue-800 flex items-center gap-2">
+                <i class="fas fa-university text-yellow-400"></i> APEX BANK
+            </div>
+            
+            <nav class="flex-1 mt-6">
+                <a href="#" onclick="showTab('dashboard')" class="nav-item flex items-center px-6 py-4 transition-all hover:bg-blue-800 active-link" id="link-dashboard">
+                    <i class="fas fa-home mr-3"></i> Dashboard
+                </a>
+                <a href="#" onclick="showTab('create-account')" class="nav-item flex items-center px-6 py-4 transition-all hover:bg-blue-800" id="link-create-account">
+                    <i class="fas fa-user-plus mr-3"></i> Open Account
+                </a>
+                <a href="#" onclick="showTab('deposit')" class="nav-item flex items-center px-6 py-4 transition-all hover:bg-blue-800" id="link-deposit">
+                    <i class="fas fa-money-bill-wave mr-3"></i> Cash Deposit
+                </a>
+                <a href="#" onclick="showTab('balance')" class="nav-item flex items-center px-6 py-4 transition-all hover:bg-blue-800" id="link-balance">
+                    <i class="fas fa-wallet mr-3"></i> Check Balance
+                </a>
+            </nav>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="flex-1 flex flex-col overflow-y-auto">
+            
+            <header class="bg-white shadow-sm p-4 flex justify-between items-center px-8">
+                <h2 class="text-xl font-bold text-blue-900 uppercase" id="tab-title">Dashboard</h2>
+                <button onclick="clearAllData()" class="text-xs bg-gray-200 px-3 py-1 rounded hover:bg-red-100 hover:text-red-600 transition">Reset System</button>
+            </header>
+
+            <div class="p-8">
+
+                <!-- 1. DASHBOARD -->
+                <div id="dashboard" class="tab-content active">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="bg-white p-6 rounded-xl shadow-sm border-b-4 border-blue-600">
+                            <h3 class="text-gray-500 text-sm font-bold uppercase">Total Customers</h3>
+                            <p class="text-3xl font-bold mt-2" id="stat-customers">0</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl shadow-sm border-b-4 border-green-600">
+                            <h3 class="text-gray-500 text-sm font-bold uppercase">Total Bank Balance</h3>
+                            <p class="text-3xl font-bold mt-2 text-green-600">₹ <span id="stat-balance">0</span></p>
+                        </div>
+                    </div>
+
+                    <div class="mt-8 bg-white p-6 rounded-xl shadow-md">
+                        <h3 class="text-lg font-bold mb-4 text-gray-700">Recent Accounts</h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left">
+                                <thead class="text-gray-400 text-sm uppercase border-b">
+                                    <tr>
+                                        <th class="pb-3">Bank</th>
+                                        <th class="pb-3">Account No</th>
+                                        <th class="pb-3">Customer</th>
+                                        <th class="pb-3 text-right">Balance</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="recent-accounts-table">
+                                    <!-- Dynamic Content -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. CREATE ACCOUNT -->
+                <div id="create-account" class="tab-content">
+                    <div class="max-w-2xl bg-white p-8 rounded-xl shadow-xl mx-auto border-t-4 border-blue-900">
+                        <h2 class="text-2xl font-bold mb-6 text-blue-900">Open New Account</h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-bold text-gray-700 mb-1">Choose Bank</label>
+                                <select id="reg-bank" class="w-full p-3 border rounded-lg bg-gray-50">
+                                    <option>Apex Central Bank</option>
+                                    <option>State Bank of India (SBI)</option>
+                                    <option>HDFC Bank</option>
+                                    <option>ICICI Bank</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-1">Full Name</label>
+                                <input type="text" id="reg-name" placeholder="Enter name" class="w-full p-3 border rounded-lg">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-1">Initial Deposit (₹)</label>
+                                <input type="number" id="reg-amount" placeholder="Min 500" class="w-full p-3 border rounded-lg">
+                            </div>
+                        </div>
+                        <button onclick="createAccount()" class="mt-8 w-full bg-blue-900 text-white py-4 rounded-lg font-bold hover:bg-blue-800 transition shadow-md">
+                            CREATE ACCOUNT
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 3. CASH DEPOSIT -->
+                <div id="deposit" class="tab-content">
+                    <div class="max-w-md bg-white p-8 rounded-xl shadow-xl mx-auto border-t-4 border-green-600">
+                        <h2 class="text-2xl font-bold mb-6 text-green-700 text-center">Cash Deposit</h2>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700">Account Number</label>
+                                <input type="text" id="dep-acc-no" placeholder="Enter Account No" class="w-full p-4 border rounded-lg font-mono">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700">Amount (₹)</label>
+                                <input type="number" id="dep-amount" placeholder="0.00" class="w-full p-4 border rounded-lg text-2xl font-bold">
+                            </div>
+                            <button onclick="depositMoney()" class="w-full bg-green-600 text-white py-4 rounded-lg font-bold hover:bg-green-700 transition">DEPOSIT NOW</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. BALANCE CHECK -->
+                <div id="balance" class="tab-content">
+                    <div class="max-w-md bg-white p-8 rounded-xl shadow-xl mx-auto text-center border-t-4 border-indigo-600">
+                        <h2 class="text-2xl font-bold mb-6">Check Balance</h2>
+                        <input type="text" id="bal-acc-no" placeholder="Account Number" class="block w-full p-4 border-2 rounded-lg mb-6 text-center text-2xl tracking-widest outline-none">
+                        <button onclick="checkBalance()" class="w-full bg-indigo-600 text-white py-4 rounded-lg font-bold hover:bg-indigo-700 transition mb-8">FETCH BALANCE</button>
+                        
+                        <div id="balance-result" class="hidden bg-indigo-50 p-8 rounded-xl border-2 border-indigo-200">
+                            <p id="res-name" class="text-sm font-bold text-indigo-400 uppercase tracking-widest"></p>
+                            <h1 id="res-balance" class="text-5xl font-black text-indigo-900 mt-2">₹ 0.00</h1>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // --- LOGIC / FUNCTIONALITY ---
+
+        // LocalStorage initialization
+        let accounts = JSON.parse(localStorage.getItem('bank_accounts')) || [];
+
+        function showTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active-link'));
+            document.getElementById('link-' + tabId).classList.add('active-link');
+            
+            if(tabId === 'dashboard') updateDashboard();
+        }
+
+        // 1. CREATE ACCOUNT LOGIC
+        function createAccount() {
+            const bank = document.getElementById('reg-bank').value;
+            const name = document.getElementById('reg-name').value;
+            const amount = parseFloat(document.getElementById('reg-amount').value);
+
+            if(!name || !amount || amount < 500) {
+                alert("Please fill all fields. Min deposit ₹500.");
+                return;
+            }
+
+            const accNo = Math.floor(Math.random() * 9000000000) + 1000000000; // Generate 10 digit ID
+            
+            const newAccount = {
+                bank: bank,
+                name: name,
+                accNo: accNo.toString(),
+                balance: amount
+            };
+
+            accounts.push(newAccount);
+            localStorage.setItem('bank_accounts', JSON.stringify(accounts));
+            
+            alert(`Account Created Successfully!\nAccount Number: ${accNo}`);
+            
+            // Clear inputs
+            document.getElementById('reg-name').value = "";
+            document.getElementById('reg-amount').value = "";
+            showTab('dashboard');
+        }
+
+        // 2. DEPOSIT LOGIC
+        function depositMoney() {
+            const accNo = document.getElementById('dep-acc-no').value;
+            const amount = parseFloat(document.getElementById('dep-amount').value);
+
+            const account = accounts.find(a => a.accNo === accNo);
+
+            if(account && amount > 0) {
+                account.balance += amount;
+                localStorage.setItem('bank_accounts', JSON.stringify(accounts));
+                alert("Deposit Successful!");
+                document.getElementById('dep-acc-no').value = "";
+                document.getElementById('dep-amount').value = "";
+                updateDashboard();
+            } else {
+                alert("Invalid Account Number or Amount!");
+            }
+        }
+
+        // 3. CHECK BALANCE LOGIC
+        function checkBalance() {
+            const accNo = document.getElementById('bal-acc-no').value;
+            const account = accounts.find(a => a.accNo === accNo);
+
+            if(account) {
+                document.getElementById('balance-result').classList.remove('hidden');
+                document.getElementById('res-name').innerText = account.name + " (" + account.bank + ")";
+                document.getElementById('res-balance').innerText = "₹ " + account.balance.toLocaleString();
+            } else {
+                alert("Account Not Found!");
+                document.getElementById('balance-result').classList.add('hidden');
+            }
+        }
+
+        // 4. UPDATE DASHBOARD STATS
+        function updateDashboard() {
+            const totalCustomers = accounts.length;
+            const totalCash = accounts.reduce((sum, acc) => sum + acc.balance, 0);
+
+            document.getElementById('stat-customers').innerText = totalCustomers;
+            document.getElementById('stat-balance').innerText = totalCash.toLocaleString();
+
+            const tableBody = document.getElementById('recent-accounts-table');
+            tableBody.innerHTML = "";
+
+            accounts.slice(-5).reverse().forEach(acc => {
+                tableBody.innerHTML += `
+                    <tr class="border-b hover:bg-gray-50 transition">
+                        <td class="py-4 text-xs font-bold text-gray-500">${acc.bank}</td>
+                        <td class="py-4 font-mono text-blue-600">${acc.accNo}</td>
+                        <td class="py-4">${acc.name}</td>
+                        <td class="py-4 text-right font-bold">₹ ${acc.balance.toLocaleString()}</td>
+                    </tr>
+                `;
+                
+            });
+        }
+
+        function clearAllData() {
+            if(confirm("Are you sure? This will delete all bank data.")){
+                localStorage.clear();
+                accounts = [];
+                updateDashboard();
+                location.reload();
+            }
+        }
+    </script>
+    <script src="script.js"></script>
+</body>
+</html>
